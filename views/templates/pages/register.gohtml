@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Unterlagen</title>
+    <link href="/unterlagen.css" rel="stylesheet">
+    <script defer src="/unterlagen.js"></script>
+</head>
+
+<body>
+<div class="relative flex flex-col justify-center h-screen overflow-hidden">
+    <div class="w-full p-6 m-auto rounded-lg lg:max-w-lg">
+        <h1 class="text-3xl font-semibold text-center">unterlagen</h1>
+        <form method="post" action="/register" class="space-y-4">
+            <div>
+                <label class="label" for="username">
+                    <span class="text-base label-text">Username</span>
+                </label>
+                <input id="username" type="text" name="username" class="w-full input input-bordered" />
+            </div>
+            <div>
+                <label class="label" for="password">
+                    <span class="text-base label-text">Password</span>
+                </label>
+                <input id="password" type="password" name="password" class="w-full input input-bordered" />
+            </div>
+            <div class="flex flex-col items-center space-y-4">
+                <button class="btn btn-primary btn-block">Register</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

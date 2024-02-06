@@ -1,0 +1,8 @@
+.idea
+.vscode
+unterlagen.iml
+views/.parcel-cache
+views/node_modules
+views/public
+.ws
+dist/

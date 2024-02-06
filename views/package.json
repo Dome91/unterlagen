@@ -1,0 +1,28 @@
+{
+  "name": "views",
+  "version": "1.0.0",
+  "description": "",
+  "main": "public/unterlagen.js",
+  "scripts": {
+    "build": "tailwindcss build -i ./css/unterlagen.css -o ./public/unterlagen.css --minify && parcel build js/unterlagen.js",
+    "watch": "tailwindcss --watch -i ./css/unterlagen.css -o ./public/unterlagen.css",
+    "watch-js": "parcel watch js/unterlagen.js"
+  },
+  "targets": {
+    "main": {
+      "includeNodeModules": true
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/typography": "0.5.10",
+    "daisyui": "4.6.1",
+    "parcel": "2.11.0",
+    "tailwindcss": "3.4.1"
+  },
+  "dependencies": {
+    "htmx.org": "^1.9.11"
+  }
+}

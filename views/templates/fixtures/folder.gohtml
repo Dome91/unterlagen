@@ -1,0 +1,8 @@
+{{define "folder"}}
+    <div>
+        <a href="/folders?folderId={{.ID}}" class="flex flex-col items-center justify-end btn-ghost rounded-lg max-w-32">
+            {{template "folderIcon"}}
+            <p class="text-ellipsis overflow-hidden">{{.Name}}</p>
+        </a>
+    </div>
+{{end}}

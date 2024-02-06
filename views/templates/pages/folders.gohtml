@@ -1,0 +1,64 @@
+{{define "content"}}
+    <div class="space-y-2">
+        <div class="flex justify-center join">
+            <button hx-on:click="document.getElementById('upload-document-modal').showModal()"
+                    class="btn btn-lg btn-neutral join-item max-w-20">
+                {{template "uploadDocumentIcon"}}
+            </button>
+            <button hx-on:click="document.getElementById('create-folder-modal').showModal()"
+                    class="btn btn-neutral btn-lg join-item max-w-20">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/>
+                </svg>
+            </button>
+            <button class="btn btn-neutral btn-lg join-item max-w-20">
+                {{template "editIcon"}}
+            </button>
+            <button hx-delete="/folders/{{.ID}}" hx-confirm="Do you really want do delete this folder?"
+                    class="btn btn-neutral btn-lg join-item max-w-20">
+                {{template "trashIcon"}}
+            </button>
+        </div>
+        <div class="breadcrumbs">
+            <ul>
+                {{range .breadcrumbs}}
+                    <li class="link-primary text-sm"><a href="/folders?folderId={{.Id}}">{{.Name}}</a></li>
+                {{end}}
+            </ul>
+        </div>
+        <div class="grid gap-8 justify-items-center content-end flexible-grid">
+            {{range .folders}}
+                {{template "folder" .}}
+            {{end}}
+            {{range .documents}}
+                {{template "document" .}}
+            {{end}}
+        </div>
+    </div>
+    <dialog id="upload-document-modal" class="modal modal-bottom md:modal-middle">
+        <div class="modal-box space-y-4">
+            <h3 class="font-bold text-lg">Upload Document</h3>
+            <form hx-post="/documents" hx-encoding='multipart/form-data' method="dialog"
+                  class="space-y-4 flex flex-col justify-center">
+                <input type="file" accept="application/pdf" name="document" required
+                       class="file-input w-full bg-neutral"/>
+                <input name="folderId" type="text" hidden value="{{.folderId}}"/>
+                <button class="btn btn-primary btn-block">Upload</button>
+            </form>
+        </div>
+    </dialog>
+    <dialog id="create-folder-modal" class="modal modal-bottom md:modal-middle">
+        <div class="modal-box space-y-4">
+            <label for="folder_name" class="font-bold text-lg">Create Folder</label>
+            <form hx-post="/folders" method="dialog" class="space-y-4 flex flex-col justify-center">
+                <input type="text" name="name" required class="input w-full bg-neutral"/>
+                <input name="parentId" type="text" hidden value="{{.folderId}}"/>
+                <button class="btn btn-primary btn-block">Create</button>
+            </form>
+        </div>
+    </dialog>
+{{end}}
+
+{{template "defaultLayout" .}}

@@ -1,0 +1,15 @@
+{{define "publicLayout"}}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <title>Unterlagen</title>
+        <link href="/unterlagen.css" rel="stylesheet">
+        <script defer src="/unterlagen.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    </head>
+
+    <body class="container mx-auto px-2 md:px-0" hx-boost="true">
+    {{template "content" .}}
+    </body>
+    </html>
+{{end}}
