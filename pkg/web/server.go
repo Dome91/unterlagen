@@ -34,6 +34,9 @@ func StartServer(documents *domain.Documents, folders *domain.Folders, users *do
 	router.Get("/folders", getFolder)
 	router.Post("/documents", createDocument)
 	router.Get("/documents/:id", downloadDocument)
+	if config.Development {
+
+	}
 	serveAssets(router)
 
 	addr := fmt.Sprintf(":%s", config.Port)

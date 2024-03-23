@@ -43,7 +43,7 @@ func LoginUser(users *domain.Users) http.HandlerFunc {
 			return
 		}
 
-		httpx.Redirect(writer, "/folders", http.StatusMovedPermanently)
+		httpx.Redirect(writer, "/folders", http.StatusOK)
 	}
 }
 
