@@ -2,7 +2,7 @@
     <div class="relative flex flex-col justify-center h-screen overflow-hidden">
         <div class="w-full p-6 m-auto rounded-lg lg:max-w-lg">
             <h1 class="text-3xl font-semibold text-center">Unterlagen</h1>
-            <form method="POST" action="/" class="space-y-4">
+            <form hx-post="/" class="space-y-4">
                 <div>
                     <label class="label" for="username">
                         <span class="text-base label-text">Username</span>
@@ -24,4 +24,4 @@
     </div>
 {{end}}
 
-{{template "publicLayout" .}}
+{{template "public" .}}

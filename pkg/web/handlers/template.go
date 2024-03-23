@@ -7,7 +7,6 @@ import (
 	"io/fs"
 	"os"
 	"unterlagen/pkg/config"
-	"unterlagen/pkg/web/auth"
 	"unterlagen/views"
 )
 
@@ -69,14 +68,12 @@ func processTemplates(filesystem fs.FS) templateMap {
 	files = append(files, load("templates/fixtures", filesystem)...)
 	files = append(files, load("templates/icons", filesystem)...)
 	files = append(files, load("templates/layouts", filesystem)...)
-	commonTemplate := template.Must(template.ParseFS(filesystem, files...))
+	commonTemplate := template.Must(template.New("common").ParseFS(filesystem, files...))
 
 	pages := load("templates/pages", filesystem)
 	templates := make(map[string]*template.Template)
 	for _, page := range pages {
-		templates[page] = template.Must(template.Must(commonTemplate.Clone()).ParseFS(filesystem, page)).Funcs(map[string]any{
-			"isAuthenticated": auth.CreateSession(),
-		})
+		templates[page] = template.Must(template.Must(commonTemplate.Clone()).ParseFS(filesystem, page))
 	}
 
 	return templates

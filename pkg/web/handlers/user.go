@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"unterlagen/pkg/domain"
 	"unterlagen/pkg/web/auth"
+	"unterlagen/pkg/web/httpx"
 )
 
 func ShowLogin(executor TemplateExecutor) http.HandlerFunc {
@@ -25,24 +26,24 @@ func LoginUser(users *domain.Users) http.HandlerFunc {
 		user, err := users.Get(username)
 		if err != nil {
 			log.Err(err).Msg("user does not exist")
-			http.Redirect(writer, request, "/", http.StatusMovedPermanently)
+			httpx.Redirect(writer, "/", http.StatusMovedPermanently)
 			return
 		}
 
 		if !user.IsValid(password) {
 			log.Err(err).Msg("password is invalid")
-			http.Redirect(writer, request, "/", http.StatusMovedPermanently)
+			httpx.Redirect(writer, "/", http.StatusMovedPermanently)
 			return
 		}
 
 		err = auth.CreateSession(writer, request, user)
 		if err != nil {
 			log.Err(err).Msg("session could not be created")
-			http.Redirect(writer, request, "/", http.StatusMovedPermanently)
+			httpx.Redirect(writer, "/", http.StatusMovedPermanently)
 			return
 		}
 
-		http.Redirect(writer, request, "/folders", http.StatusMovedPermanently)
+		httpx.Redirect(writer, "/folders", http.StatusMovedPermanently)
 	}
 }
 
@@ -52,8 +53,7 @@ func LogoutUser() http.HandlerFunc {
 		if err != nil {
 			log.Err(err).Msg("session could not be deleted")
 		}
-		writer.Header().Set("HX-Redirect", "/")
-		//http.Redirect(writer, request, "/", http.StatusMovedPermanently)
+		httpx.Redirect(writer, "/", http.StatusMovedPermanently)
 	}
 }
 

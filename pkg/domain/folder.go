@@ -3,7 +3,6 @@ package domain
 import (
 	"context"
 	"errors"
-	"fmt"
 )
 
 var ErrParentFolderDoesNotExist = errors.New("parent folder does not exist")
@@ -18,6 +17,10 @@ type Folder struct {
 
 func (f Folder) ID() string {
 	return f.Id
+}
+
+func (f Folder) IsRoot() bool {
+	return f.ParentId == ""
 }
 
 type FolderRepository interface {
@@ -54,7 +57,7 @@ func (f *Folders) Handle(event Event) error {
 func (f *Folders) createRoot(userId string) error {
 	folder := Folder{
 		Id:       generateID(),
-		Name:     fmt.Sprintf("Unterlagen of %s", userId),
+		Name:     "Home",
 		ParentId: "",
 		UserId:   userId,
 	}

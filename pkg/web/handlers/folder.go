@@ -26,33 +26,24 @@ func CreateFolder(folders *domain.Folders) http.HandlerFunc {
 }
 
 func GetFolder(documents *domain.Documents, folders *domain.Folders, executor TemplateExecutor) http.HandlerFunc {
-	type Breadcrumb struct {
-		Id   string
-		Name string
-	}
-
-	buildBreadcrumbs := func(ctx context.Context, folderId string) []Breadcrumb {
-		var breadcrumbs []Breadcrumb
+	buildHierarchy := func(ctx context.Context, folder domain.Folder) []domain.Folder {
+		hierarchy := []domain.Folder{folder}
+		parentId := folder.ParentId
 		for {
-			parent, err := folders.Get(ctx, folderId)
+			if parentId == "" {
+				break
+			}
+			parent, err := folders.Get(ctx, parentId)
 			if err != nil {
 				log.Err(err).Msg("failed to get parent")
 				break
 			}
-
-			breadcrumbs = append(breadcrumbs, Breadcrumb{
-				Id:   parent.Id,
-				Name: parent.Name,
-			})
-
-			if parent.ParentId == "" {
-				break
-			}
-			folderId = parent.ParentId
+			hierarchy = append(hierarchy, parent)
+			parentId = parent.ParentId
 		}
 
-		slices.Reverse(breadcrumbs)
-		return breadcrumbs
+		slices.Reverse(hierarchy)
+		return hierarchy
 	}
 
 	return func(writer http.ResponseWriter, request *http.Request) {
@@ -70,6 +61,12 @@ func GetFolder(documents *domain.Documents, folders *domain.Folders, executor Te
 		}
 
 		folderId = folderIds[0]
+		folder, err := folders.Get(ctx, folderId)
+		if err != nil {
+			log.Err(err).Msg("failed to get documents")
+			return
+		}
+
 		documentsInFolder, err := documents.GetInFolder(ctx, folderId)
 		if err != nil {
 			log.Err(err).Msg("failed to get documents")
@@ -83,10 +80,10 @@ func GetFolder(documents *domain.Documents, folders *domain.Folders, executor Te
 		}
 
 		err = executor.ExecuteTemplate(writer, "folders.gohtml", map[string]any{
-			"folderId":    folderId,
-			"breadcrumbs": buildBreadcrumbs(ctx, folderId),
-			"documents":   documentsInFolder,
-			"folders":     foldersInFolder,
+			"Current":   folder,
+			"Hierarchy": buildHierarchy(ctx, folder),
+			"Documents": documentsInFolder,
+			"Folders":   foldersInFolder,
 		})
 		if err != nil {
 			log.Err(err).Msg("failed to template folder.gohtml")
