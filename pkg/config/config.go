@@ -8,6 +8,7 @@ import (
 )
 
 var Development = os.Getenv("DEVELOPMENT") != ""
+var EndToEnd = os.Getenv("E2E") != ""
 var Port = os.Getenv("PORT")
 var CookieSecret = []byte(os.Getenv("COOKIE_SECRET"))
 
@@ -22,7 +23,7 @@ func init() {
 		CookieSecret = securecookie.GenerateRandomKey(32)
 	}
 
-	if Development {
+	if Development || EndToEnd {
 		log.Info().Msg("Started in development mode")
 		err := os.MkdirAll(".ws", 0755)
 		if err != nil {
