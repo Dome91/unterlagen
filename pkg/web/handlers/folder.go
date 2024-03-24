@@ -49,31 +49,26 @@ func GetFolder(documents *domain.Documents, folders *domain.Folders, executor Te
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ctx := request.Context()
 		folderIds := request.URL.Query()["folderId"]
-		var folderId string
+
+		var folder domain.Folder
+		var err error
 		if len(folderIds) == 0 {
-			rootFolderOfUser, err := folders.GetRoot(ctx)
-			if err != nil {
-				return
-			}
-			url := fmt.Sprintf("/folders?folderId=%s", rootFolderOfUser.Id)
-			http.Redirect(writer, request, url, http.StatusPermanentRedirect)
+			folder, err = folders.GetRoot(ctx)
+		} else {
+			folder, err = folders.Get(ctx, folderIds[0])
+		}
+		if err != nil {
+			log.Err(err).Msg("failed to get folder")
 			return
 		}
 
-		folderId = folderIds[0]
-		folder, err := folders.Get(ctx, folderId)
+		documentsInFolder, err := documents.GetInFolder(ctx, folder.Id)
 		if err != nil {
 			log.Err(err).Msg("failed to get documents")
 			return
 		}
 
-		documentsInFolder, err := documents.GetInFolder(ctx, folderId)
-		if err != nil {
-			log.Err(err).Msg("failed to get documents")
-			return
-		}
-
-		foldersInFolder, err := folders.GetChildren(ctx, folderId)
+		foldersInFolder, err := folders.GetChildren(ctx, folder.Id)
 		if err != nil {
 			log.Err(err).Msg("failed to get folders")
 			return
