@@ -2,12 +2,9 @@ package auth
 
 import (
 	"context"
-	"crypto/rand"
 	"encoding/gob"
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
-	"github.com/rs/zerolog/log"
-	"math/big"
 	"net/http"
 	"slices"
 	"unterlagen/pkg/config"
@@ -15,11 +12,7 @@ import (
 )
 
 const (
-	lowercaseChars = "abcdefghijklmnopqrstuvwxyz"
-	uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	numberChars    = "0123456789"
-	passwordLength = 10
-	sessionName    = "unterlagen"
+	sessionName = "unterlagen"
 )
 
 var (
@@ -27,30 +20,9 @@ var (
 	store     sessions.Store
 )
 
-func ConfigureSession(router chi.Router, users *domain.Users) {
+func ConfigureSession(router chi.Router) {
 	gob.Register(domain.UserRole(""))
-	store = sessions.NewCookieStore(config.CookieSecret)
-
-	adminExists, err := users.ExistsByRole(domain.UserRoleAdmin)
-	if err != nil {
-		panic(err)
-	}
-
-	if !adminExists {
-		var adminPassword string
-		if config.Development {
-			adminPassword = "admin"
-		} else {
-			adminPassword = generatePassword()
-		}
-
-		err := users.Create("admin", adminPassword, domain.UserRoleAdmin)
-		if err != nil {
-			panic(err)
-		}
-		log.Info().Str("password", adminPassword).Str("username", "admin").Msg("Generated credentials")
-	}
-
+	store = sessions.NewCookieStore(config.Get().CookieSecret)
 	router.Use(validateSession)
 }
 
@@ -74,18 +46,6 @@ func validateSession(next http.Handler) http.Handler {
 		ctx = context.WithValue(ctx, domain.ContextKeyUserRole, role)
 		next.ServeHTTP(writer, request.WithContext(ctx))
 	})
-}
-
-func generatePassword() string {
-	var password string
-	charset := lowercaseChars + uppercaseChars + numberChars
-
-	for i := 0; i < passwordLength; i++ {
-		randomIndex, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
-		password += string(charset[randomIndex.Int64()])
-	}
-
-	return password
 }
 
 func CreateSession(writer http.ResponseWriter, request *http.Request, user domain.User) error {

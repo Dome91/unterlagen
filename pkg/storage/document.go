@@ -19,6 +19,7 @@ type FileDocumentStorageOptions struct {
 }
 
 func NewDocumentStorage(options ...FileDocumentStorageOptions) *FilesystemDocumentStorage {
+	initialize()
 	var _options FileDocumentStorageOptions
 	if len(options) == 0 {
 		_options = FileDocumentStorageOptions{FS: afero.NewOsFs()}

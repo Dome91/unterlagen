@@ -14,17 +14,8 @@ type FileUserRepository struct {
 	FileRepository[domain.User]
 }
 
-func (r *FileUserRepository) ExistsByRole(role domain.UserRole) (bool, error) {
-	for _, user := range r.store {
-		if user.Role == role {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
 func NewUserRepository(options ...FileUserRepositoryOptions) *FileUserRepository {
+	initialize()
 	var _options FileUserRepositoryOptions
 	if len(options) == 0 {
 		_options = FileUserRepositoryOptions{FS: afero.NewOsFs()}
@@ -43,4 +34,14 @@ func NewUserRepository(options ...FileUserRepositoryOptions) *FileUserRepository
 
 	repository.load()
 	return repository
+}
+
+func (r *FileUserRepository) ExistsByRole(role domain.UserRole) (bool, error) {
+	for _, user := range r.store {
+		if user.Role == role {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

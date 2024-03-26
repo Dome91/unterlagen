@@ -1,12 +1,18 @@
 package web
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog/log"
 	"io/fs"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 	"unterlagen/pkg/config"
 	"unterlagen/pkg/domain"
 	"unterlagen/pkg/web/auth"
@@ -14,7 +20,7 @@ import (
 	"unterlagen/views"
 )
 
-func StartServer(documents *domain.Documents, folders *domain.Folders, users *domain.Users) error {
+func StartServer(documents *domain.Documents, folders *domain.Folders, users *domain.Users) {
 	router := chi.NewRouter()
 	registerMiddleware(router, users)
 
@@ -34,17 +40,55 @@ func StartServer(documents *domain.Documents, folders *domain.Folders, users *do
 	router.Get("/folders", getFolder)
 	router.Post("/documents", createDocument)
 	router.Get("/documents/:id", downloadDocument)
-	if config.Development {
-
-	}
 	serveAssets(router)
 
-	addr := fmt.Sprintf(":%s", config.Port)
-	return http.ListenAndServe(addr, router)
+	err := users.CreateAdmin()
+	if err != nil {
+		panic(err)
+	}
+
+	addr := fmt.Sprintf(":%s", config.Get().Port)
+	server := &http.Server{Addr: addr, Handler: router}
+	serverCtx, serverStopCtx := context.WithCancel(context.Background())
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		<-sig
+		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+		go func() {
+			<-shutdownCtx.Done()
+			if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
+				panic(err)
+			}
+		}()
+
+		err := server.Shutdown(shutdownCtx)
+		if err != nil {
+			panic(err)
+		}
+
+		serverStopCtx()
+	}()
+
+	err = server.ListenAndServe()
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		panic(err)
+	}
+
+	<-serverCtx.Done()
+	log.Info().Msg("Stopped server")
+}
+
+func StopServer() {
+	log.Info().Msg("Stopping server")
+	err := syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func serveAssets(router chi.Router) {
-	if config.Development {
+	if config.Get().Development {
 		assets := http.FileServer(http.Dir("views/public"))
 		router.Handle("/*", assets)
 	} else {
@@ -82,5 +126,5 @@ func configureLogging(router chi.Router) {
 func registerMiddleware(router chi.Router, users *domain.Users) {
 	router.Use(middleware.Recoverer)
 	configureLogging(router)
-	auth.ConfigureSession(router, users)
+	auth.ConfigureSession(router)
 }

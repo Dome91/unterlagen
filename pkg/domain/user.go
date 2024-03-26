@@ -2,8 +2,12 @@ package domain
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
+	"math/big"
+	"unterlagen/pkg/config"
 )
 
 const (
@@ -106,6 +110,48 @@ func (u *Users) ExistsByRole(role UserRole) (bool, error) {
 
 func (u *Users) Get(username string) (User, error) {
 	return u.repository.FindById(username)
+}
+
+func (u *Users) CreateAdmin() error {
+	generatePassword := func() string {
+		lowercaseChars := "abcdefghijklmnopqrstuvwxyz"
+		uppercaseChars := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		numberChars := "0123456789"
+		passwordLength := 10
+
+		var password string
+		charset := lowercaseChars + uppercaseChars + numberChars
+		for i := 0; i < passwordLength; i++ {
+			randomIndex, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+			password += string(charset[randomIndex.Int64()])
+		}
+		return password
+	}
+
+	adminExists, err := u.repository.ExistsByRole(UserRoleAdmin)
+	if err != nil {
+		return err
+	}
+
+	if !adminExists {
+		var adminPassword string
+		if config.Get().Development {
+			adminPassword = "admin"
+		} else if config.Get().E2E {
+			adminPassword = "e2e"
+		} else {
+			adminPassword = generatePassword()
+		}
+
+		err := u.Create("admin", adminPassword, UserRoleAdmin)
+		if err != nil {
+			return err
+		}
+
+		log.Info().Str("password", adminPassword).Str("username", "admin").Msg("Generated credentials")
+	}
+
+	return nil
 }
 
 func CurrentUser(ctx context.Context) string {

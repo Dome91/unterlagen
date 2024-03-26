@@ -15,6 +15,7 @@ type FileFolderRepository struct {
 }
 
 func NewFolderRepository(options ...FileFolderRepositoryOptions) *FileFolderRepository {
+	initialize()
 	var _options FileFolderRepositoryOptions
 	if len(options) == 0 {
 		_options = FileFolderRepositoryOptions{FS: afero.NewOsFs()}

@@ -14,8 +14,5 @@ func main() {
 	documents := domain.NewDocuments(repository.NewDocumentRepository(), storage.NewDocumentStorage())
 	users := domain.NewUsers(repository.NewUserRepository(), eventBus)
 
-	err := web.StartServer(documents, folders, users)
-	if err != nil {
-		panic(err)
-	}
+	web.StartServer(documents, folders, users)
 }

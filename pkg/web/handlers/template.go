@@ -17,7 +17,7 @@ type TemplateExecutor interface {
 }
 
 func NewTemplateExecutor() TemplateExecutor {
-	if config.Development {
+	if config.Get().Development {
 		return newDevelopmentTemplateExecutor()
 	}
 	return newProductionTemplateExecutor()
