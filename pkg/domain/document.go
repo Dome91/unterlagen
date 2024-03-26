@@ -81,7 +81,7 @@ func (d *Documents) Get(ctx context.Context, id string) (Document, error) {
 		return Document{}, err
 	}
 
-	if document.UserId == CurrentUser(ctx) {
+	if document.UserId != CurrentUser(ctx) {
 		return Document{}, ErrUserUnauthorized
 	}
 

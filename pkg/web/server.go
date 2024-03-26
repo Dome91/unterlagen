@@ -20,9 +20,11 @@ import (
 	"unterlagen/views"
 )
 
+var serverShutDownSignal chan os.Signal
+
 func StartServer(documents *domain.Documents, folders *domain.Folders, users *domain.Users) {
 	router := chi.NewRouter()
-	registerMiddleware(router, users)
+	registerMiddleware(router)
 
 	executor := handlers.NewTemplateExecutor()
 	showLogin := handlers.ShowLogin(executor)
@@ -39,7 +41,7 @@ func StartServer(documents *domain.Documents, folders *domain.Folders, users *do
 	router.Post("/folders", createFolder)
 	router.Get("/folders", getFolder)
 	router.Post("/documents", createDocument)
-	router.Get("/documents/:id", downloadDocument)
+	router.Get("/documents/{id}", downloadDocument)
 	serveAssets(router)
 
 	err := users.CreateAdmin()
@@ -50,11 +52,14 @@ func StartServer(documents *domain.Documents, folders *domain.Folders, users *do
 	addr := fmt.Sprintf(":%s", config.Get().Port)
 	server := &http.Server{Addr: addr, Handler: router}
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	serverShutDownSignal = make(chan os.Signal, 1)
+	signal.Notify(serverShutDownSignal, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
 	go func() {
-		<-sig
-		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+		<-serverShutDownSignal
+		shutdownCtx, shutdownCtxCancel := context.WithTimeout(serverCtx, 30*time.Second)
+		defer shutdownCtxCancel()
+
 		go func() {
 			<-shutdownCtx.Done()
 			if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
@@ -80,11 +85,7 @@ func StartServer(documents *domain.Documents, folders *domain.Folders, users *do
 }
 
 func StopServer() {
-	log.Info().Msg("Stopping server")
-	err := syscall.Kill(syscall.Getpid(), syscall.SIGINT)
-	if err != nil {
-		panic(err)
-	}
+	serverShutDownSignal <- os.Kill
 }
 
 func serveAssets(router chi.Router) {
@@ -123,7 +124,7 @@ func configureLogging(router chi.Router) {
 	router.Use(loggingMw)
 }
 
-func registerMiddleware(router chi.Router, users *domain.Users) {
+func registerMiddleware(router chi.Router) {
 	router.Use(middleware.Recoverer)
 	configureLogging(router)
 	auth.ConfigureSession(router)

@@ -1,7 +1,6 @@
 package domain_test
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -26,7 +25,7 @@ func TestFolders(t *testing.T) {
 
 		folder, err := repository.FindByUserIdAndParentIdEmpty(event.UserId)
 		assert.Nil(t, err)
-		assert.Equal(t, folder.Name, fmt.Sprintf("Unterlagen of %s", event.UserId))
+		assert.Equal(t, folder.Name, "Home")
 		assert.Equal(t, folder.ParentId, "")
 	})
 

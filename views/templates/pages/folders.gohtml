@@ -17,11 +17,13 @@
         </div>
         <div class="flex justify-center join">
             <button hx-on:click="document.getElementById('upload-document-modal').showModal()"
-                    class="btn btn-primary join-item max-w-16">
+                    class="btn btn-primary join-item max-w-16"
+                    aria-label="Upload Document">
                 {{template "uploadDocumentIcon"}}
             </button>
             <button hx-on:click="document.getElementById('create-folder-modal').showModal()"
-                    class="btn btn-primary join-item max-w-16">
+                    class="btn btn-primary join-item max-w-16"
+                    aria-label="Create Folder">
                 {{template "createFolderIcon"}}
             </button>
             <!--<button class="btn btn-primary join-item max-w-16">
@@ -46,8 +48,9 @@
             <h3 class="font-bold text-lg">Upload Document</h3>
             <form hx-post="/documents" hx-encoding='multipart/form-data' method="dialog"
                   class="space-y-4 flex flex-col justify-center">
-                <input type="file" accept="application/pdf" name="document" required
-                       class="file-input w-full bg-neutral"/>
+                <input aria-label="Choose Document" type="file" accept="application/pdf" name="document" required
+                       class="file-input w-full bg-neutral"
+                       role="button"/>
                 <input name="folderId" type="text" hidden value="{{.Current.Id}}" aria-label="ID of the folder"/>
                 <button class="btn btn-primary btn-block">Upload</button>
             </form>
@@ -55,10 +58,10 @@
     </dialog>
     <dialog id="create-folder-modal" class="modal modal-bottom md:modal-middle">
         <div class="modal-box space-y-4">
-            <label for="folder_name" class="font-bold text-lg">Create Folder</label>
+            <h3 class="font-bold text-lg">Create Folder</h3>
             <form hx-post="/folders" method="dialog" class="space-y-4 flex flex-col justify-center">
                 <input type="text" name="name" required class="input w-full bg-neutral"
-                       aria-label="Name of the new folder"/>
+                       aria-label="Name of folder"/>
                 <input name="parentId" type="text" hidden value="{{.Current.Id}}" aria-label="ID of the parent folder"/>
                 <button class="btn btn-primary btn-block">Create</button>
             </form>

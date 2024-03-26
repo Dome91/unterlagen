@@ -12,15 +12,15 @@ jobs:
         with:
           node-version: '20.x'
       - name: Install dependencies
-        working-directory: ./web/views
+        working-directory: views
         run: npm i
       - name: Build
-        working-directory: ./web/views
+        working-directory: views
         run: npm run build
       - uses: actions/upload-artifact@v4
         with:
           name: assets
-          path: web/views/public
+          path: views/public
   Service:
     runs-on: ubuntu-latest
     needs:
@@ -30,12 +30,12 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21.x'
+          go-version: '1.22.x'
       - name: Download assets
         uses: actions/download-artifact@v4
         with:
           name: assets
-          path: web/views/public
+          path: views/public
       - name: Install dependencies
         run: go mod download
       - name: Test

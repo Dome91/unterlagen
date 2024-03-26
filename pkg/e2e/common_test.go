@@ -14,7 +14,7 @@ import (
 	"unterlagen/pkg/web"
 )
 
-func withServer(t *testing.T, block func(context playwright.BrowserContext)) {
+func withServer(t *testing.T, block func(page playwright.Page, pwAssert playwright.PlaywrightAssertions)) {
 	viper.Set("e2e", true)
 	fs := afero.NewMemMapFs()
 	eventBus := eventing.NewEventBus()
@@ -30,19 +30,31 @@ func withServer(t *testing.T, block func(context playwright.BrowserContext)) {
 	go web.StartServer(documents, folders, users)
 	defer web.StopServer()
 
-	baseUrl := "http://localhost:8080"
-
 	err := playwright.Install()
 	require.Nil(t, err)
 	pw, err := playwright.Run()
+	defer pw.Stop()
+
 	assert.Nil(t, err)
-	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
+	browser, err := pw.Firefox.Launch(playwright.BrowserTypeLaunchOptions{
 		Headless: playwright.Bool(false),
 	})
 	assert.Nil(t, err)
+	baseUrl := "http://localhost:8080"
 	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		BaseURL: &baseUrl,
 	})
 	assert.Nil(t, err)
-	block(context)
+	page, err := context.NewPage()
+	assert.Nil(t, err)
+	_, err = page.Goto("/")
+	assert.Nil(t, err)
+
+	assert.Nil(t, page.GetByLabel("username").Fill("admin"))
+	assert.Nil(t, page.GetByLabel("password").Fill("e2e"))
+	assert.Nil(t, page.GetByText("Login").Click())
+	assert.Nil(t, page.WaitForURL("**/folders"))
+
+	pwAssert := playwright.NewPlaywrightAssertions()
+	block(page, pwAssert)
 }

@@ -1,5 +1,5 @@
 {{define "document" }}
-    <a href="/documents/{{.ID}}" download class="flex flex-col items-center justify-end btn-ghost rounded-lg cursor-pointer max-w-32">
+    <a hx-boost="false" href="/documents/{{.ID}}" download class="flex flex-col items-center justify-end btn-ghost rounded-lg cursor-pointer max-w-32">
         {{template "documentIcon"}}
         <p class="text-ellipsis overflow-hidden max-w-32">{{.Filename}}</p>
     </a>

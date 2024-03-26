@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"unterlagen/pkg/domain"
+	"unterlagen/pkg/web/httpx"
 )
 
 func UploadDocument(documents *domain.Documents) http.HandlerFunc {
@@ -29,7 +30,7 @@ func UploadDocument(documents *domain.Documents) http.HandlerFunc {
 			return
 		}
 
-		writer.WriteHeader(http.StatusCreated)
+		httpx.Redirect(writer, fmt.Sprintf("/folders?folderId=%s", folderId), http.StatusCreated)
 	}
 }
 
