@@ -34,6 +34,7 @@ func StartServer(documents *domain.Documents, folders *domain.Folders, users *do
 	getFolder := handlers.GetFolder(documents, folders, executor)
 	createDocument := handlers.UploadDocument(documents)
 	downloadDocument := handlers.DownloadDocument(documents)
+	notFound := handlers.NotFound(executor)
 
 	router.Get("/", showLogin)
 	router.Post("/", loginUser)
@@ -42,6 +43,7 @@ func StartServer(documents *domain.Documents, folders *domain.Folders, users *do
 	router.Get("/folders", getFolder)
 	router.Post("/documents", createDocument)
 	router.Get("/documents/{id}", downloadDocument)
+	router.NotFound(notFound)
 	serveAssets(router)
 
 	err := users.CreateAdmin()
@@ -89,17 +91,18 @@ func StopServer() {
 }
 
 func serveAssets(router chi.Router) {
+	var fileServer http.Handler
 	if config.Get().Development {
-		assets := http.FileServer(http.Dir("views/public"))
-		router.Handle("/*", assets)
+		fileServer = http.FileServer(http.Dir("views/public"))
 	} else {
 		assets, err := fs.Sub(views.Assets, "public")
 		if err != nil {
 			panic(err)
 		}
-
-		router.Handle("/*", http.FileServer(http.FS(assets)))
+		fileServer = http.FileServer(http.FS(assets))
 	}
+	router.Handle("/{}.js", fileServer)
+	router.Handle("/{}.css", fileServer)
 }
 
 func configureLogging(router chi.Router) {
