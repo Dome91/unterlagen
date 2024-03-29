@@ -22,7 +22,9 @@ builds:
       - windows
       - darwin
     main: ./cmd
-
+dockers:
+  - image_templates:
+      - "ghcr.io/dome91/unterlagen"
 archives:
   - format: tar.gz
     # this name template makes the OS and Arch compatible with the results of `uname`.

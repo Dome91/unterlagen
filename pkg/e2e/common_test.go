@@ -3,10 +3,10 @@ package e2e
 import (
 	"github.com/playwright-community/playwright-go"
 	"github.com/spf13/afero"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"unterlagen/pkg/config"
 	"unterlagen/pkg/domain"
 	"unterlagen/pkg/eventing"
 	"unterlagen/pkg/repository"
@@ -15,7 +15,7 @@ import (
 )
 
 func withServer(t *testing.T, block func(page playwright.Page, pwAssert playwright.PlaywrightAssertions)) {
-	viper.Set("e2e", true)
+	config.Overwrite("e2e", "true")
 	fs := afero.NewMemMapFs()
 	eventBus := eventing.NewEventBus()
 	documentStorage := storage.NewDocumentStorage(storage.FileDocumentStorageOptions{FS: fs})

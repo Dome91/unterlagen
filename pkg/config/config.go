@@ -54,3 +54,6 @@ func init() {
 func Get() Config {
 	return loadConfig()
 }
+func Overwrite(key string, value string) {
+	viper.Set(key, value)
+}
