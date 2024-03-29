@@ -7,9 +7,11 @@ import (
 )
 
 var initialize = sync.OnceFunc(func() {
-	if config.Get().Development {
-		for index, file := range files {
+	for index, file := range files {
+		if config.Get().Development {
 			files[index] = path.Join(".ws", file)
+		} else {
+			files[index] = path.Join(config.Get().DataDirectory, file)
 		}
 	}
 })

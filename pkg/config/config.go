@@ -6,14 +6,16 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"os"
+	"path"
 	"sync"
 )
 
 type Config struct {
-	Development  bool
-	E2E          bool
-	Port         string
-	CookieSecret []byte
+	Development   bool
+	E2E           bool
+	Port          string
+	CookieSecret  []byte
+	DataDirectory string
 }
 
 var loadConfig func() Config
@@ -23,19 +25,25 @@ func init() {
 	loadConfig = sync.OnceValue(func() Config {
 		viper.AutomaticEnv()
 		viper.SetEnvPrefix("unterlagen")
+
 		viper.SetDefault("development", false)
 		viper.SetDefault("e2e", false)
 		viper.SetDefault("port", "8080")
 		viper.SetDefault("cookie_secret", securecookie.GenerateRandomKey(32))
+		viper.SetDefault("data_directory", path.Join(".", "data"))
+
 		development := viper.GetBool("development")
 		e2e := viper.GetBool("e2e")
 		port := viper.GetString("port")
 		cookieSecret := viper.GetString("cookie_secret")
+		dataDirectory := viper.GetString("data_directory")
+
 		config := Config{
-			Development:  development,
-			E2E:          e2e,
-			Port:         port,
-			CookieSecret: []byte(cookieSecret),
+			Development:   development,
+			E2E:           e2e,
+			Port:          port,
+			CookieSecret:  []byte(cookieSecret),
+			DataDirectory: dataDirectory,
 		}
 
 		if development {
