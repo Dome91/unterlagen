@@ -24,7 +24,7 @@ builds:
     main: ./cmd
 dockers:
   - image_templates:
-      - "ghcr.io/dome91/unterlagen"
+      - "ghcr.io/dome91/unterlagen:{{ .Tag }}"
 archives:
   - format: tar.gz
     # this name template makes the OS and Arch compatible with the results of `uname`.
