@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/spf13/afero"
+	"path"
 	"sync"
 	"unterlagen/pkg/domain"
 )
@@ -21,6 +22,11 @@ func NewUserRepository(options ...FileUserRepositoryOptions) *FileUserRepository
 		_options = FileUserRepositoryOptions{FS: afero.NewOsFs()}
 	} else {
 		_options = options[0]
+	}
+
+	err := _options.FS.MkdirAll(path.Dir(files[USER]), 0755)
+	if err != nil {
+		panic(err)
 	}
 
 	repository := &FileUserRepository{

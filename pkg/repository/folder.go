@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/spf13/afero"
+	"path"
 	"sync"
 	"unterlagen/pkg/domain"
 )
@@ -22,6 +23,12 @@ func NewFolderRepository(options ...FileFolderRepositoryOptions) *FileFolderRepo
 	} else {
 		_options = options[0]
 	}
+
+	err := _options.FS.MkdirAll(path.Dir(files[FOLDER]), 0755)
+	if err != nil {
+		panic(err)
+	}
+
 	repository := &FileFolderRepository{
 		FileRepository[domain.Folder]{
 			fs:       _options.FS,
