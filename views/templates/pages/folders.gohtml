@@ -1,6 +1,6 @@
 {{define "content"}}
     <div class=space-y-4>
-        <div class="flex flex-col">
+        <div>
             <div class="breadcrumbs">
                 <ul>
                     {{range .Hierarchy}}
@@ -13,26 +13,28 @@
                     {{end}}
                 </ul>
             </div>
-            <div class="text-2xl max-sm:mx-auto">{{.Current.Name}}</div>
-        </div>
-        <div class="flex justify-center join">
-            <button hx-on:click="document.getElementById('upload-document-modal').showModal()"
-                    class="btn btn-primary join-item max-w-16"
-                    aria-label="Upload Document">
-                {{template "uploadDocumentIcon"}}
-            </button>
-            <button hx-on:click="document.getElementById('create-folder-modal').showModal()"
-                    class="btn btn-primary join-item max-w-16"
-                    aria-label="Create Folder">
-                {{template "createFolderIcon"}}
-            </button>
-            <!--<button class="btn btn-primary join-item max-w-16">
+            <div class="space-x-4 flex items-center justify-between">
+                <span class="text-2xl">{{.Current.Name}}</span>
+                <div class="">
+                    <button hx-on:click="document.getElementById('upload-document-modal').showModal()"
+                            class="btn btn-ghost max-w-14 md:max-w-16"
+                            aria-label="Upload Document">
+                        {{template "uploadDocumentIcon"}}
+                    </button>
+                    <button hx-on:click="document.getElementById('create-folder-modal').showModal()"
+                            class="btn btn-ghost max-w-14 md:max-w-16"
+                            aria-label="Create Folder">
+                        {{template "createFolderIcon"}}
+                    </button>
+                    <!--<button class="btn btn-primary join-item max-w-16">
                 {{template "editIcon"}}
             </button>
             <button hx-delete="/folders/{{.Current.Id}}" hx-confirm="Do you really want do delete this folder?"
                     class="btn btn-primary {{if not .Current.ParentId}} btn-disabled {{end}}} join-item max-w-16">
                 {{template "trashIcon"}}
             </button>-->
+                </div>
+            </div>
         </div>
         <div class="grid gap-8 justify-items-center content-end flexible-grid">
             {{range .Folders}}

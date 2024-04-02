@@ -101,13 +101,13 @@ func serveAssets(router chi.Router) {
 		}
 		fileServer = http.FileServer(http.FS(assets))
 	}
-	router.Handle("/{}.js", fileServer)
+	router.Handle("/{}.js*", fileServer)
 	router.Handle("/{}.css", fileServer)
 }
 
 func configureLogging(router chi.Router) {
 	loggingMw := func(next http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 			defer func() {
 				log.Info().Fields(map[string]interface{}{
@@ -119,9 +119,7 @@ func configureLogging(router chi.Router) {
 				}).Msg("Request")
 			}()
 			next.ServeHTTP(ww, r)
-		}
-
-		return http.HandlerFunc(fn)
+		})
 	}
 
 	router.Use(loggingMw)
